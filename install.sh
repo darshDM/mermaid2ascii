@@ -5,7 +5,7 @@ set -euo pipefail
 # Usage (after replacing YOUR_GITHUB_USERNAME in this file):
 #   curl -fsSL https://raw.githubusercontent.com/YOUR_GITHUB_USERNAME/mermaid2ascii/main/install.sh | bash
 
-REPO="${MERMAID2ASCII_REPO:-https://github.com/YOUR_GITHUB_USERNAME/mermaid2ascii}"
+REPO="${MERMAID2ASCII_REPO:-https://github.com/darshDM/mermaid2ascii}"
 REF="${MERMAID2ASCII_REF:-main}"
 SKILL_NAME="mermaid-ascii"
 SKILL_DIR="${CLAUDE_SKILL_DIR:-$HOME/.claude/skills/$SKILL_NAME}"
