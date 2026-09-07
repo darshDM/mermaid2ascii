@@ -1,8 +1,10 @@
-# mermaid-ascii
+# mermaid2ascii
 
-Render [mermaid](https://mermaid.js.org/) diagrams as plain ASCII/Unicode text for terminals and agents.
+Render [Mermaid](https://mermaid.js.org/) diagrams as plain ASCII/Unicode text for terminals and coding agents.
 
-```
+Currently supports **flowcharts**.
+
+```mermaid
 flowchart TD
     A[Start] --> B{Valid?}
     B -->|Yes| C[Process]
@@ -13,14 +15,14 @@ flowchart TD
 
 Renders as:
 
-```
+```text
              ┌───────┐
              │ Start │
              └───────┘
                  │
                  v
         /────────────────\
-        |    Valid?      |
+        |     Valid?      |
         \────────────────/
                  │
            Yes   │   No
@@ -28,7 +30,7 @@ Renders as:
         │                  │
         v                  v
 ┌──────────────┐   ┌──────────────┐
-│   Process    │   │   Reject     │
+│   Process    │   │    Reject    │
 └──────────────┘   └──────────────┘
         │                  │
         └────────┬─────────┘
@@ -39,99 +41,189 @@ Renders as:
              └──────┘
 ```
 
-## Quick start
+## Install
 
-Clone into your skill directory:
+### Claude Code — one command
+
+Install the skill directly from GitHub:
 
 ```bash
-# Claude Code / Claude.ai - project level
-git clone https://github.com/anthropics/mermaid2ascii.git .claude/skills/mermaid-ascii
-
-# Claude Code - personal
-git clone https://github.com/anthropics/mermaid2ascii.git ~/.claude/skills/mermaid-ascii
+curl -fsSL https://raw.githubusercontent.com/darshDM/mermaid2ascii/main/install.sh | bash
 ```
 
-That's it. No install needed.
+The installer sets up everything automatically:
+
+* Installs the skill to `~/.claude/skills/mermaid-ascii`
+* Creates an isolated Python environment inside the skill
+* Installs the Mermaid → ASCII renderer
+* Exposes the `mermaid-ascii` command through `~/.local/bin`
+* Requires no global Python packages
+* Requires no manual `.claude` setup
+
+Restart Claude Code after installation.
+
+### Manual installation
+
+If you prefer not to use the installer:
+
+```bash
+git clone https://github.com/darshDM/mermaid2ascii.git ~/.claude/skills/mermaid-ascii
+```
+
+Then install the Python package:
+
+```bash
+cd ~/.claude/skills/mermaid-ascii
+python3 -m venv .venv
+.venv/bin/pip install .
+```
 
 ## Usage
 
-### As a skill
+### With Claude Code
 
-Use in any agent prompt: "create a flowchart showing..." The agent renders it directly in the response.
+Once installed, simply ask Claude to create or render a Mermaid flowchart.
 
-### CLI (if installed)
+For example:
+
+> Create a flowchart showing the authentication flow.
+
+The skill detects the Mermaid diagram and renders it as an ASCII/Unicode diagram directly in the terminal or response.
+
+### CLI
+
+Render a Mermaid file:
+
+```bash
+mermaid-ascii diagram.mmd
+```
+
+Render Mermaid code directly:
+
+```bash
+mermaid-ascii -c "flowchart TD; A[Start] --> B[End]"
+```
+
+Or pipe Mermaid through stdin:
+
+```bash
+cat diagram.mmd | mermaid-ascii
+```
+
+You can also run the module directly:
 
 ```bash
 python3 -m mermaid_ascii.cli diagram.mmd
-python3 -m mermaid_ascii.cli -c "flowchart TD; A[Start] --> B[End]"
-cat diagram.mmd | python3 -m mermaid_ascii.cli
 ```
 
-### Python API
+## Supported diagrams
+
+Currently:
+
+| Diagram          | Status |
+| ---------------- | ------ |
+| Flowchart        | ✅      |
+| Sequence diagram | 🚧     |
+| Class diagram    | 🚧     |
+| State diagram    | 🚧     |
+| ER diagram       | 🚧     |
+
+More diagram types will be added over time.
+
+## Flowchart support
+
+| Feature                                                       | Status      |
+| ------------------------------------------------------------- | ----------- |
+| Rectangle, rounded, stadium, circle, decision, hexagon shapes | ✅           |
+| Solid, dotted, thick arrows                                   | ✅           |
+| Edge labels                                                   | ✅           |
+| Cycles & skip edges                                           | ✅           |
+| TD, TB, BT, LR, RL directions                                 | ✅           |
+| Width fitting                                                 | ✅           |
+| Subgraph syntax                                               | ✅ Flattened |
+| Automatic routing                                             | ✅           |
+
+## Python API
+
+The renderer can also be used directly from Python:
 
 ```python
 from mermaid_ascii import convert
 
-diagram = convert("flowchart TD; A[Start] --> B[End]")
+diagram = convert("""
+flowchart TD
+    A[Start] --> B[Process]
+    B --> C[Done]
+""")
+
 print(diagram)
 ```
 
-## Supported (flowcharts only)
-
-| Feature | Status |
-|---------|--------|
-| Rectangle, rounded, stadium, circle, decision, hexagon shapes | ✅ |
-| Solid, dotted, thick arrows | ✅ |
-| Edge labels | ✅ |
-| Cycles & skip edges (auto-routed) | ✅ |
-| TD, TB, BT, LR, RL directions | ✅ |
-| Width fitting (`--max-width`, `--direction`) | ✅ |
-| Subgraph syntax | ✅ (flattened — boxes not drawn) |
-
 ## Architecture
 
-Parser → Graph → Renderer
-
-Each diagram type (flowchart, sequence, class, etc.) is self-contained:
-
-- Add parser in `parsers/`
-- Add renderer in `renderers/`
-- Register in factories
-- Done
-
-See `AGENTS.md` for development.
-
-## License
-
-MIT
-
-## One-command Claude Code install
-
-The project includes a self-contained installer for Claude Code. Replace `YOUR_GITHUB_USERNAME` in `install.sh` once after publishing the repository, then users can install the skill with:
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/YOUR_GITHUB_USERNAME/mermaid2ascii/main/install.sh | bash
+```text
+Mermaid source
+      │
+      ▼
+   Detector
+      │
+      ▼
+    Parser
+      │
+      ▼
+ Graph / IR
+      │
+      ▼
+   Renderer
+      │
+      ▼
+ ASCII / Unicode
 ```
 
-The installer:
+Each diagram type is designed to be independently extensible.
 
-- installs the skill to `~/.claude/skills/mermaid-ascii`
-- keeps the Python runtime inside the skill at `~/.claude/skills/mermaid-ascii/.venv`
-- exposes `mermaid-ascii` at `~/.local/bin/mermaid-ascii`
-- does not require pip or third-party packages for the current zero-dependency renderer
+To add a new diagram type:
 
-To install from a fork without editing `install.sh`, set `MERMAID2ASCII_REPO`:
+1. Add a parser in `parsers/`
+2. Add a renderer in `renderers/`
+3. Register it with the detector/factory
+4. Add tests
 
-```bash
-MERMAID2ASCII_REPO=https://github.com/YOUR_GITHUB_USERNAME/mermaid2ascii \
-curl -fsSL https://raw.githubusercontent.com/YOUR_GITHUB_USERNAME/mermaid2ascii/main/install.sh | bash
+See `AGENTS.md` for development guidelines.
+
+## Project structure
+
+```text
+mermaid2ascii/
+├── mermaid_ascii/
+│   ├── cli.py
+│   ├── detector.py
+│   ├── models.py
+│   ├── parsers/
+│   ├── renderers/
+│   └── ...
+├── SKILL.md
+├── install.sh
+├── pyproject.toml
+├── README.md
+└── LICENSE
 ```
 
-After installation, restart Claude Code. The skill can invoke the bundled renderer regardless of the current working directory.
+## Uninstall
 
-### Uninstall
+Remove the Claude Code skill and CLI:
 
 ```bash
 rm -rf ~/.claude/skills/mermaid-ascii
 rm -f ~/.local/bin/mermaid-ascii
 ```
+
+## Contributing
+
+Contributions are welcome, especially new Mermaid diagram parsers and renderers.
+
+See `CONTRIBUTING.md` for development instructions.
+
+## License
+
+MIT
