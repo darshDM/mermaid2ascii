@@ -1,0 +1,11 @@
+flowchart TD
+    A[Client Request] -->|HTTP| B[Load Balancer]
+    B --> C[Server 1]
+    B --> D[Server 2]
+    C -.-> E[(Database)]
+    D -.-> E
+    C ==> F{Cache hit?}
+    F -->|Yes| G([Return cached])
+    F -->|No| H[[Compute]]
+    H --> G
+    G --> I((Response))

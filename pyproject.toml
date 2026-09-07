@@ -1,0 +1,61 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+# NOTE: the distribution name (what you `pip install`) is "mermaid2ascii",
+# not "mermaid-ascii" - that name is already taken on PyPI by an unrelated
+# project. The Python import name (`import mermaid_ascii`) and CLI commands
+# (`mermaid-ascii`, `mermaid-ascii-mcp`) are unaffected - only the name you
+# type into `pip install` differs, which is a common split in the Python
+# ecosystem (e.g. `pip install beautifulsoup4` -> `import bs4`).
+name = "mermaid2ascii"
+version = "0.1.0"
+description = "Render mermaid diagrams as plain ASCII/Unicode text for terminals and AI agents"
+readme = "README.md"
+requires-python = ">=3.8"
+license = { text = "MIT" }
+authors = [{ name = "mermaid-ascii contributors" }]
+keywords = ["mermaid", "ascii", "diagram", "cli", "flowchart", "mcp", "ai-agent", "terminal"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Text Processing :: Markup",
+    "Topic :: Software Development :: Documentation",
+    "Topic :: Terminals",
+]
+# Zero runtime dependencies on purpose - stdlib only, so the core CLI/library
+# installs instantly anywhere (including inside restricted / offline agent
+# sandboxes). The MCP server needs the 'mcp' package - see [project.optional-dependencies].
+dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/YOUR_GITHUB_USERNAME/mermaid2ascii"
+Repository = "https://github.com/YOUR_GITHUB_USERNAME/mermaid2ascii"
+Issues = "https://github.com/YOUR_GITHUB_USERNAME/mermaid2ascii/issues"
+Changelog = "https://github.com/YOUR_GITHUB_USERNAME/mermaid2ascii/blob/main/CHANGELOG.md"
+
+[project.optional-dependencies]
+# The MCP SDK itself requires Python 3.10+, even though the core package
+# supports 3.8+. Only needed for `mermaid-ascii-mcp` / mcp_server.py.
+mcp = ["mcp>=1.0.0"]
+dev = ["build", "twine"]
+
+[project.scripts]
+mermaid-ascii = "mermaid_ascii.cli:main"
+mermaid-ascii-mcp = "mermaid_ascii.mcp_server:main"
+
+[tool.setuptools]
+packages = [
+    "mermaid_ascii",
+    "mermaid_ascii.parsers",
+    "mermaid_ascii.renderers",
+]

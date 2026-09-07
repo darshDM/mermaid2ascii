@@ -1,0 +1,5 @@
+flowchart LR
+    A[Login] --> B{Valid creds?}
+    B -->|Yes| C[Dashboard]
+    B -->|No| A
+    C --> D[Logout]
